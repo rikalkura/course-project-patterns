@@ -10,3 +10,5 @@ public class GetPopularItemsQuery : IRequest<IEnumerable<PopularItemDto>>
     public DateTime? EndDate { get; set; }
 }
 
+
+

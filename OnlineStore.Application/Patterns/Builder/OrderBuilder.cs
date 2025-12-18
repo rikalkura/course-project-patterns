@@ -1,3 +1,4 @@
+using OnlineStore.Application.Patterns.Strategy;
 using OnlineStore.Core.Entities;
 using OnlineStore.Core.Enums;
 
@@ -6,6 +7,7 @@ namespace OnlineStore.Application.Patterns.Builder;
 public class OrderBuilder
 {
     private Order _order = new();
+    private IDeliveryCostStrategy? _deliveryStrategy;
 
     public OrderBuilder WithClient(string clientId)
     {
@@ -22,10 +24,22 @@ public class OrderBuilder
         return this;
     }
 
-    public OrderBuilder WithDeliveryMethod(DeliveryMethod method)
+    public OrderBuilder WithDeliveryMethod(DeliveryMethod method, IDeliveryCostStrategy? deliveryStrategy = null)
     {
         _order.DeliveryMethod = method;
+        _deliveryStrategy = deliveryStrategy ?? CreateDeliveryStrategy(method);
         return this;
+    }
+
+    private IDeliveryCostStrategy CreateDeliveryStrategy(DeliveryMethod method)
+    {
+        return method switch
+        {
+            DeliveryMethod.Standard => new StandardDeliveryStrategy(),
+            DeliveryMethod.Express => new ExpressDeliveryStrategy(),
+            DeliveryMethod.Overnight => new OvernightDeliveryStrategy(),
+            _ => new StandardDeliveryStrategy()
+        };
     }
 
     public OrderBuilder WithPaymentMethod(PaymentMethod method)
@@ -77,12 +91,20 @@ public class OrderBuilder
 
         // Calculate total
         _order.CalculateTotal();
+        var subtotalBeforeDiscount = _order.TotalAmount;
 
-        // Apply promo code discount if applicable
+        // Apply promo code discount using Strategy pattern
         if (_order.PromoCode != null && _order.PromoCode.IsValid(DateTime.UtcNow))
         {
-            var discount = _order.TotalAmount * (_order.PromoCode.DiscountPercentage / 100);
-            _order.TotalAmount -= discount;
+            IPricingStrategy pricingStrategy = new PercentageDiscountStrategy(_order.PromoCode.DiscountPercentage);
+            _order.TotalAmount = pricingStrategy.CalculatePrice(_order.TotalAmount, 0);
+        }
+
+        // Add delivery cost using Strategy pattern
+        if (_deliveryStrategy != null)
+        {
+            var deliveryCost = _deliveryStrategy.CalculateDeliveryCost(_order.TotalAmount);
+            _order.TotalAmount += deliveryCost;
         }
 
         return _order;

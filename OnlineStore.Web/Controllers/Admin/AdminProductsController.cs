@@ -1,12 +1,15 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using OnlineStore.Application.Features.Products.Commands.CreateProduct;
 using OnlineStore.Application.Features.Products.Commands.DeleteProduct;
 using OnlineStore.Application.Features.Products.Commands.UpdateProduct;
 using OnlineStore.Application.Features.Products.DTOs;
 using OnlineStore.Application.Features.Products.Queries.GetProductById;
 using OnlineStore.Application.Features.Products.Queries.GetProductsList;
+using OnlineStore.Core.Interfaces;
+using OnlineStore.Infrastructure.Services;
 
 namespace OnlineStore.Web.Controllers.Admin;
 
@@ -14,10 +17,14 @@ namespace OnlineStore.Web.Controllers.Admin;
 public class AdminProductsController : Controller
 {
     private readonly IMediator _mediator;
+    private readonly IFileService _fileService;
+    private readonly ICategoryRepository _categoryRepository;
 
-    public AdminProductsController(IMediator mediator)
+    public AdminProductsController(IMediator mediator, IFileService fileService, ICategoryRepository categoryRepository)
     {
         _mediator = mediator;
+        _fileService = fileService;
+        _categoryRepository = categoryRepository;
     }
 
     // GET: Admin/AdminProducts
@@ -48,8 +55,10 @@ public class AdminProductsController : Controller
     }
 
     // GET: Admin/AdminProducts/Create
-    public IActionResult Create()
+    public async Task<IActionResult> Create()
     {
+        var categories = await _categoryRepository.GetAllAsync();
+        ViewBag.Categories = new SelectList(categories, "Id", "Name");
         return View(new CreateProductDto());
     }
 
@@ -60,6 +69,8 @@ public class AdminProductsController : Controller
     {
         if (!ModelState.IsValid)
         {
+            var categories = await _categoryRepository.GetAllAsync();
+            ViewBag.Categories = new SelectList(categories, "Id", "Name", productDto.CategoryId);
             return View(productDto);
         }
 
@@ -91,6 +102,9 @@ public class AdminProductsController : Controller
             StockQuantity = product.StockQuantity
         };
 
+        var categories = await _categoryRepository.GetAllAsync();
+        ViewBag.Categories = new SelectList(categories, "Id", "Name", updateDto.CategoryId);
+
         return View(updateDto);
     }
 
@@ -106,6 +120,8 @@ public class AdminProductsController : Controller
 
         if (!ModelState.IsValid)
         {
+            var categories = await _categoryRepository.GetAllAsync();
+            ViewBag.Categories = new SelectList(categories, "Id", "Name", updateDto.CategoryId);
             return View(updateDto);
         }
 
@@ -144,8 +160,20 @@ public class AdminProductsController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
+        // Get product to delete photo
+        var query = new GetProductByIdQuery { Id = id };
+        var product = await _mediator.Send(query);
+
         var command = new DeleteProductCommand { Id = id };
         await _mediator.Send(command);
+
+        // Delete associated photo file (only if it's a local file, not a Cloudinary URL)
+        if (product != null && !string.IsNullOrEmpty(product.PhotoPath) &&
+            !product.PhotoPath.StartsWith("http://") && 
+            !product.PhotoPath.StartsWith("https://"))
+        {
+            await _fileService.DeleteProductImageAsync(product.PhotoPath);
+        }
 
         return RedirectToAction(nameof(Index));
     }

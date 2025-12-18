@@ -1,0 +1,90 @@
+@model IEnumerable<OnlineStore.Application.Features.Products.DTOs.ProductDto>
+@{
+    ViewData["Title"] = "Products";
+}
+
+<h1 class="mb-4">Products</h1>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form asp-action="Index" method="get">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <input type="text" name="searchTerm" value="@ViewBag.SearchTerm" class="form-control" placeholder="Search products or categories..." />
+                </div>
+                <div class="col-md-3">
+                    <select name="categoryId" class="form-select" asp-items="ViewBag.Categories">
+                        <option value="">All Categories</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-check mt-2">
+                        <input type="checkbox" name="inStockOnly" value="true" @(ViewBag.InStockOnly == true ? "checked" : "") class="form-check-input" id="inStockOnly" />
+                        <label class="form-check-label" for="inStockOnly">In Stock Only</label>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary w-100 mb-2">Search</button>
+                    <a asp-action="Index" class="btn btn-secondary w-100">Clear</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (Model != null && Model.Any())
+{
+    <div class="row">
+        @foreach (var product in Model)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="product-card">
+                    @if (!string.IsNullOrEmpty(product.PhotoPath))
+                    {
+                        @if (product.PhotoPath.StartsWith("http://") || product.PhotoPath.StartsWith("https://"))
+                        {
+                            <img src="@product.PhotoPath" class="product-card-image" alt="@product.Name" />
+                        }
+                        else
+                        {
+                            <img src="~/@product.PhotoPath" class="product-card-image" alt="@product.Name" />
+                        }
+                    }
+                    else
+                    {
+                        <div class="product-card-image-placeholder">
+                            <span>No Image</span>
+                        </div>
+                    }
+                    <div class="product-card-body">
+                        <h5 class="product-card-title">@product.Name</h5>
+                        <p class="product-card-description">@(product.Description?.Length > 100 ? product.Description.Substring(0, 100) + "..." : product.Description ?? "No description available.")</p>
+                        <p class="product-card-category">
+                            <small>Category: @product.CategoryName</small>
+                        </p>
+                        <div class="product-card-footer">
+                            <div class="product-card-price">$@product.Price.ToString("F2")</div>
+                            @if (product.IsInStock)
+                            {
+                                <span class="badge bg-success product-card-badge">In Stock (@product.StockQuantity)</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger product-card-badge">Out of Stock</span>
+                            }
+                            <a asp-action="Details" asp-route-id="@product.Id" class="btn product-card-button">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="alert alert-info">
+        <p>No products found.</p>
+        <a asp-action="Index" class="btn btn-primary">View All Products</a>
+    </div>
+}
+

@@ -1,0 +1,62 @@
+@model OnlineStore.Application.Features.Products.DTOs.ProductDto
+@{
+    ViewData["Title"] = "Product Details - Admin";
+}
+
+<h1 class="mb-4">Product Details</h1>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            @if (!string.IsNullOrEmpty(Model.PhotoPath))
+            {
+                @if (Model.PhotoPath.StartsWith("http://") || Model.PhotoPath.StartsWith("https://"))
+                {
+                    <img src="@Model.PhotoPath" class="img-fluid" alt="@Model.Name" style="border-radius: var(--border-radius-large);" />
+                }
+                else
+                {
+                    <img src="~/@Model.PhotoPath" class="img-fluid" alt="@Model.Name" style="border-radius: var(--border-radius-large);" />
+                }
+            }
+            else
+            {
+                <div class="product-card-image-placeholder" style="height: 400px;">
+                    <span>No Image Available</span>
+                </div>
+            }
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h1 class="mb-3">@Model.Name</h1>
+                <p class="text-muted mb-4">Category: @Model.CategoryName</p>
+                
+                <div class="mb-4">
+                    <h3 class="text-primary mb-3">$@Model.Price.ToString("F2")</h3>
+                    @if (Model.IsInStock)
+                    {
+                        <span class="badge bg-success">In Stock (@Model.StockQuantity available)</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">Out of Stock</span>
+                    }
+                </div>
+                
+                <div class="mb-4">
+                    <h4 class="mb-3">Description</h4>
+                    <p class="card-text">@(string.IsNullOrEmpty(Model.Description) ? "No description available." : Model.Description)</p>
+                </div>
+                
+                <div class="mt-4">
+                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">Delete</a>
+                    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

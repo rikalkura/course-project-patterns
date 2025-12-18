@@ -9,3 +9,5 @@ public class GetRevenueReportQuery : IRequest<RevenueReportDto>
     public DateTime EndDate { get; set; }
 }
 
+
+

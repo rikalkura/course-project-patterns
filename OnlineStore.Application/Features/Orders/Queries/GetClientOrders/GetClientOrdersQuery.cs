@@ -8,3 +8,5 @@ public class GetClientOrdersQuery : IRequest<IEnumerable<OrderDto>>
     public string ClientId { get; set; } = string.Empty;
 }
 
+
+

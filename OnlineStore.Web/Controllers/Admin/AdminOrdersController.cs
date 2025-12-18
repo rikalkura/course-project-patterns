@@ -21,6 +21,10 @@ public class AdminOrdersController : Controller
     // GET: Admin/AdminOrders
     public async Task<IActionResult> Index(OrderStatus? status, DateTime? startDate, DateTime? endDate)
     {
+        ViewBag.Status = status;
+        ViewBag.StartDate = startDate;
+        ViewBag.EndDate = endDate;
+
         var query = new GetOrdersListQuery
         {
             Status = status,
@@ -51,15 +55,26 @@ public class AdminOrdersController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> UpdateStatus(int id, OrderStatus status)
     {
-        var command = new UpdateOrderStatusCommand
+        try
         {
-            OrderId = id,
-            Status = status
-        };
+            var command = new UpdateOrderStatusCommand
+            {
+                OrderId = id,
+                Status = status
+            };
 
-        await _mediator.Send(command);
+            await _mediator.Send(command);
+
+            TempData["Success"] = $"Order status updated to {status} successfully.";
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = $"Failed to update order status: {ex.Message}";
+        }
 
         return RedirectToAction(nameof(Details), new { id });
     }
 }
+
+
 

@@ -7,3 +7,5 @@ public class DailyRevenueDto
     public decimal Revenue { get; set; }
 }
 
+
+

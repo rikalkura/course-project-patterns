@@ -9,3 +9,5 @@ public class SalesByCategoryDto
     public decimal TotalRevenue { get; set; }
 }
 
+
+

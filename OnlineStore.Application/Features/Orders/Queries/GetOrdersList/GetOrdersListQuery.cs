@@ -11,3 +11,5 @@ public class GetOrdersListQuery : IRequest<IEnumerable<OrderDto>>
     public DateTime? EndDate { get; set; }
 }
 
+
+

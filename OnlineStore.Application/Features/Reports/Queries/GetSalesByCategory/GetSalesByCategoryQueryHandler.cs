@@ -36,6 +36,7 @@ public class GetSalesByCategoryQueryHandler : IRequestHandler<GetSalesByCategory
 
         var salesByCategory = validOrders
             .SelectMany(o => o.OrderItems)
+            .Where(oi => oi.Product != null && oi.Product.Category != null)
             .GroupBy(oi => new { oi.Product.CategoryId, oi.Product.Category.Name })
             .Select(g => new SalesByCategoryDto
             {

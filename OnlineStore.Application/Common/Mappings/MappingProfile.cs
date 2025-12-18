@@ -1,7 +1,9 @@
 using AutoMapper;
 using OnlineStore.Application.Features.Orders.DTOs;
 using OnlineStore.Application.Features.Products.DTOs;
+using OnlineStore.Application.Patterns.Strategy;
 using OnlineStore.Core.Entities;
+using OnlineStore.Core.Enums;
 
 namespace OnlineStore.Application.Common.Mappings;
 
@@ -30,7 +32,12 @@ public class MappingProfile : Profile
         // Order mappings
         CreateMap<Core.Entities.Order, OrderDto>()
             .ForMember(dest => dest.ClientName, opt => opt.MapFrom(src => src.Client.FullName))
-            .ForMember(dest => dest.PromoCode, opt => opt.MapFrom(src => src.PromoCode != null ? src.PromoCode.Code : null));
+            .ForMember(dest => dest.PromoCode, opt => opt.MapFrom(src => src.PromoCode != null ? src.PromoCode.Code : null))
+            .ForMember(dest => dest.DiscountAmount, opt => opt.MapFrom(src => 
+                src.PromoCode != null && src.OrderItems != null && src.OrderItems.Any()
+                    ? src.OrderItems.Sum(item => item.Subtotal) * (src.PromoCode.DiscountPercentage / 100m)
+                    : 0m))
+            .ForMember(dest => dest.DeliveryCost, opt => opt.MapFrom<OrderDeliveryCostResolver>());
 
         CreateMap<Core.Entities.OrderItem, OrderItemDto>()
             .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.Name));

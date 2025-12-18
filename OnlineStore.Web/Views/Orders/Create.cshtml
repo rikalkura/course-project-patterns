@@ -1,0 +1,128 @@
+@model OnlineStore.Application.Features.Orders.DTOs.CreateOrderDto
+@using OnlineStore.Core.Enums
+@{
+    ViewData["Title"] = "Checkout";
+    var cart = ViewBag.Cart as OnlineStore.Application.Features.Cart.DTOs.CartDto;
+}
+
+<h1 class="mb-4">Checkout</h1>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="row">
+    <div class="col-lg-8 mb-4">
+        <div class="card border-0 shadow-sm" style="border-radius: var(--border-radius-large);">
+            <div class="card-body">
+                <h3 class="card-title mb-4" style="color: var(--text-dark-gray);">Order Information</h3>
+                
+                <form asp-action="Create" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    
+                    <div class="mb-4">
+                        <label asp-for="ShippingAddressId" class="form-label fw-bold">Shipping Address</label>
+                        <select asp-for="ShippingAddressId" class="form-select" asp-items="ViewBag.Addresses" required>
+                            <option value="">-- Select Shipping Address --</option>
+                        </select>
+                        <span asp-validation-for="ShippingAddressId" class="text-danger"></span>
+                        <small class="form-text text-muted">Don't have an address? <a asp-controller="Addresses" asp-action="Create" asp-route-returnUrl="@Url.Action("Create", "Orders")" class="text-primary">Add a new address</a></small>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label asp-for="DeliveryMethod" class="form-label fw-bold">Delivery Method</label>
+                        <select asp-for="DeliveryMethod" class="form-select" required>
+                            <option value="">-- Select Delivery Method --</option>
+                            <option value="@DeliveryMethod.Standard">Standard (5-7 business days)</option>
+                            <option value="@DeliveryMethod.Express">Express (2-3 business days)</option>
+                            <option value="@DeliveryMethod.Overnight">Overnight (1 business day)</option>
+                        </select>
+                        <span asp-validation-for="DeliveryMethod" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label asp-for="PaymentMethod" class="form-label fw-bold">Payment Method</label>
+                        <select asp-for="PaymentMethod" class="form-select" required>
+                            <option value="">-- Select Payment Method --</option>
+                            <option value="@PaymentMethod.CreditCard">Credit Card</option>
+                            <option value="@PaymentMethod.DebitCard">Debit Card</option>
+                            <option value="@PaymentMethod.PayPal">PayPal</option>
+                            <option value="@PaymentMethod.BankTransfer">Bank Transfer</option>
+                        </select>
+                        <span asp-validation-for="PaymentMethod" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label asp-for="PromoCode" class="form-label fw-bold">Promo Code (Optional)</label>
+                        <input asp-for="PromoCode" class="form-control" placeholder="Enter promo code" />
+                        <span asp-validation-for="PromoCode" class="text-danger"></span>
+                        <small class="form-text text-muted">Have a discount code? Enter it here</small>
+                    </div>
+                    
+                    <div class="d-flex gap-3 mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg px-5" style="border-radius: var(--border-radius-large); font-weight: 600;">
+                            <i class="bi bi-check-circle me-2"></i>Place Order
+                        </button>
+                        <a asp-controller="Cart" asp-action="Index" class="btn btn-outline-secondary btn-lg" style="border-radius: var(--border-radius-large);">
+                            <i class="bi bi-arrow-left me-2"></i>Back to Cart
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm sticky-top" style="top: 20px; border-radius: var(--border-radius-large);">
+            <div class="card-body">
+                <h4 class="card-title mb-4" style="color: var(--text-dark-gray);">Order Summary</h4>
+                
+                @if (cart != null && cart.Items != null && cart.Items.Any())
+                {
+                    <div class="mb-3">
+                        @foreach (var item in cart.Items)
+                        {
+                            <div class="d-flex justify-content-between mb-2 pb-2 border-bottom">
+                                <div>
+                                    <div class="fw-semibold" style="font-size: 0.9rem;">@item.ProductName</div>
+                                    <small class="text-muted">Qty: @item.Quantity × $@item.UnitPrice.ToString("F2")</small>
+                                </div>
+                                <div class="text-end">
+                                    <div class="fw-bold">$@item.Subtotal.ToString("F2")</div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    
+                    <div class="border-top pt-3 mt-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Subtotal:</span>
+                            <span class="fw-semibold">$@cart.TotalAmount.ToString("F2")</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Shipping:</span>
+                            <span class="fw-semibold">Calculated at checkout</span>
+                        </div>
+                        <div class="d-flex justify-content-between pt-2 border-top mt-2">
+                            <span class="fw-bold" style="font-size: 1.1rem; color: var(--text-dark-gray);">Total:</span>
+                            <span class="fw-bold" style="font-size: 1.3rem; color: var(--primary-soft-blue);">$@cart.TotalAmount.ToString("F2")</span>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">No items in cart</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+

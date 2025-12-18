@@ -11,6 +11,8 @@ public class OrderDto
     public DateTime OrderDate { get; set; }
     public OrderStatus Status { get; set; }
     public decimal TotalAmount { get; set; }
+    public decimal DiscountAmount { get; set; }
+    public decimal DeliveryCost { get; set; }
     public int? PromoCodeId { get; set; }
     public string? PromoCode { get; set; }
     public DeliveryMethod DeliveryMethod { get; set; }
@@ -18,5 +20,7 @@ public class OrderDto
     public List<OrderItemDto> OrderItems { get; set; } = new();
     public AddressDto ShippingAddress { get; set; } = null!;
 }
+
+
 
 

@@ -2,6 +2,8 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using OnlineStore.Application.Features.Cart.Queries.GetCart;
 using OnlineStore.Application.Patterns.Builder;
+using OnlineStore.Application.Patterns.Factory;
+using OnlineStore.Application.Patterns.Strategy;
 using OnlineStore.Core.Entities;
 using OnlineStore.Core.Enums;
 using OnlineStore.Core.Interfaces;
@@ -17,6 +19,8 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, int
     private readonly IPromoCodeRepository _promoCodeRepository;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IMediator _mediator;
+    private readonly IProductTypeFactory _productTypeFactory;
+    private readonly IDeliveryCostStrategy _deliveryStrategy;
 
     public CreateOrderCommandHandler(
         IOrderRepository orderRepository,
@@ -24,7 +28,9 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, int
         IAddressRepository addressRepository,
         IPromoCodeRepository promoCodeRepository,
         IHttpContextAccessor httpContextAccessor,
-        IMediator mediator)
+        IMediator mediator,
+        IProductTypeFactory productTypeFactory,
+        IDeliveryCostStrategy deliveryStrategy)
     {
         _orderRepository = orderRepository;
         _productRepository = productRepository;
@@ -32,6 +38,8 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, int
         _promoCodeRepository = promoCodeRepository;
         _httpContextAccessor = httpContextAccessor;
         _mediator = mediator;
+        _productTypeFactory = productTypeFactory;
+        _deliveryStrategy = deliveryStrategy;
     }
 
     public async Task<int> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
@@ -63,12 +71,22 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, int
             }
         }
 
-        // Build order items from cart
+        // Build order items from cart using Factory pattern for product type handling
         var orderItems = new List<OrderItem>();
         foreach (var cartItem in cart.Items)
         {
-            var product = await _productRepository.GetByIdAsync(cartItem.ProductId);
-            if (product == null || product.StockQuantity < cartItem.Quantity)
+            var product = await _productRepository.GetByIdWithCategoryAsync(cartItem.ProductId);
+            if (product == null)
+            {
+                throw new InvalidOperationException($"Product {cartItem.ProductId} not found.");
+            }
+
+            // Use Factory pattern to get appropriate product handler
+            var productHandler = _productTypeFactory.CreateHandler(product);
+            
+            // Validate stock using product type handler
+            var isValidStock = await productHandler.ValidateStockAsync(cartItem.Quantity);
+            if (!isValidStock)
             {
                 throw new InvalidOperationException($"Product {cartItem.ProductId} is not available in requested quantity.");
             }
@@ -84,17 +102,17 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, int
 
             orderItems.Add(orderItem);
 
-            // Update stock
-            product.StockQuantity -= cartItem.Quantity;
+            // Process order using product type handler
+            await productHandler.ProcessOrderAsync(cartItem.Quantity);
             await _productRepository.UpdateAsync(product);
         }
 
-        // Build order using Builder pattern
+        // Build order using Builder pattern with Strategy pattern for delivery
         var orderBuilder = new OrderBuilder();
         var order = orderBuilder
             .WithClient(request.ClientId)
             .WithItems(orderItems)
-            .WithDeliveryMethod(request.OrderData.DeliveryMethod)
+            .WithDeliveryMethod(request.OrderData.DeliveryMethod, _deliveryStrategy)
             .WithPaymentMethod(request.OrderData.PaymentMethod)
             .WithAddress(address)
             .WithPromoCode(promoCode)

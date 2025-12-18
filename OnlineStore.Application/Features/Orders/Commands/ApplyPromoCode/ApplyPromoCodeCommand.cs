@@ -8,3 +8,5 @@ public class ApplyPromoCodeCommand : IRequest<decimal>
     public string PromoCode { get; set; } = string.Empty;
 }
 
+
+

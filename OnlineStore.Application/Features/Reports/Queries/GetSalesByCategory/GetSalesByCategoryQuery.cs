@@ -9,3 +9,5 @@ public class GetSalesByCategoryQuery : IRequest<IEnumerable<SalesByCategoryDto>>
     public DateTime? EndDate { get; set; }
 }
 
+
+

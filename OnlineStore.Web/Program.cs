@@ -1,9 +1,14 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OnlineStore.Application.Extensions;
+using OnlineStore.Application.Services;
 using OnlineStore.Core.Entities;
 using OnlineStore.Infrastructure.Data;
+using OnlineStore.Infrastructure.Data.Seeders;
 using OnlineStore.Infrastructure.Extensions;
+using OnlineStore.Infrastructure.Services;
+using OnlineStore.Web.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +28,12 @@ builder.Services.AddInfrastructure(builder.Configuration);
 
 // Add Application (MediatR, AutoMapper, FluentValidation)
 builder.Services.AddApplication();
+
+// Add Application Services
+builder.Services.AddScoped<IPaymentService, PaymentService>();
+
+// Add Infrastructure Services
+builder.Services.AddScoped<IFileService, FileService>();
 
 // Add Identity
 builder.Services.AddIdentity<Client, IdentityRole>(options =>
@@ -55,7 +66,34 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.SlidingExpiration = true;
 });
 
+// Add global authorization policy - require authentication by default
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+});
+
 var app = builder.Build();
+
+// Seed database
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<ApplicationDbContext>();
+        var userManager = services.GetRequiredService<UserManager<Client>>();
+        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+        
+        await DatabaseSeeder.SeedAsync(context, userManager, roleManager);
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while seeding the database.");
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -68,6 +106,9 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
+// Add global exception handler
+app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
+
 app.UseRouting();
 
 app.UseAuthentication();
@@ -76,6 +117,6 @@ app.UseSession();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Account}/{action=Login}/{id?}");
 
 app.Run();

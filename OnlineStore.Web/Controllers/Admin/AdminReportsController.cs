@@ -26,6 +26,9 @@ public class AdminReportsController : Controller
     // GET: Admin/AdminReports/SalesByCategory
     public async Task<IActionResult> SalesByCategory(DateTime? startDate, DateTime? endDate)
     {
+        ViewBag.StartDate = startDate;
+        ViewBag.EndDate = endDate;
+
         var query = new GetSalesByCategoryQuery
         {
             StartDate = startDate,
@@ -58,6 +61,10 @@ public class AdminReportsController : Controller
     // GET: Admin/AdminReports/PopularItems
     public async Task<IActionResult> PopularItems(int topN = 10, DateTime? startDate = null, DateTime? endDate = null)
     {
+        ViewBag.TopN = topN;
+        ViewBag.StartDate = startDate;
+        ViewBag.EndDate = endDate;
+
         var query = new GetPopularItemsQuery
         {
             TopN = topN,
@@ -69,4 +76,6 @@ public class AdminReportsController : Controller
         return View(items);
     }
 }
+
+
 

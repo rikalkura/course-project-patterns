@@ -24,3 +24,5 @@ public class PromoCodeConfiguration : IEntityTypeConfiguration<PromoCode>
 }
 
 
+
+

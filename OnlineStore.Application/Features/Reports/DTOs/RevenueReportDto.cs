@@ -10,3 +10,5 @@ public class RevenueReportDto
     public List<DailyRevenueDto> DailyRevenues { get; set; } = new();
 }
 
+
+

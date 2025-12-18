@@ -31,3 +31,5 @@ public class UpdateProductCommandValidator : AbstractValidator<UpdateProductComm
 }
 
 
+
+

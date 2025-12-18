@@ -11,6 +11,13 @@ public class ProductRepository : Repository<Product>, IProductRepository
     {
     }
 
+    public override async Task<IEnumerable<Product>> GetAllAsync()
+    {
+        return await _dbSet
+            .Include(p => p.Category)
+            .ToListAsync();
+    }
+
     public async Task<IEnumerable<Product>> GetByCategoryIdAsync(int categoryId)
     {
         return await _dbSet
@@ -27,7 +34,20 @@ public class ProductRepository : Repository<Product>, IProductRepository
         var lowerSearchTerm = searchTerm.ToLower();
         return await _dbSet
             .Where(p => p.Name.ToLower().Contains(lowerSearchTerm) ||
-                       (p.Description != null && p.Description.ToLower().Contains(lowerSearchTerm)))
+                       (p.Description != null && p.Description.ToLower().Contains(lowerSearchTerm)) ||
+                       (p.Category != null && p.Category.Name.ToLower().Contains(lowerSearchTerm)))
+            .Include(p => p.Category)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<Product>> SearchByCategoryAsync(int categoryId, string searchTerm)
+    {
+        var lowerSearchTerm = searchTerm.ToLower();
+        return await _dbSet
+            .Where(p => p.CategoryId == categoryId &&
+                       (p.Name.ToLower().Contains(lowerSearchTerm) ||
+                        (p.Description != null && p.Description.ToLower().Contains(lowerSearchTerm)) ||
+                        (p.Category != null && p.Category.Name.ToLower().Contains(lowerSearchTerm))))
             .Include(p => p.Category)
             .ToListAsync();
     }
@@ -47,5 +67,7 @@ public class ProductRepository : Repository<Product>, IProductRepository
             .FirstOrDefaultAsync(p => p.Id == id);
     }
 }
+
+
 
 

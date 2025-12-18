@@ -52,10 +52,26 @@ public class OrderRepository : Repository<Order>, IOrderRepository
             .Where(o => o.OrderDate >= startDate && o.OrderDate <= endDate)
             .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.Product)
+                    .ThenInclude(p => p.Category)
             .Include(o => o.Client)
             .OrderByDescending(o => o.OrderDate)
             .ToListAsync();
     }
+
+    public override async Task<IEnumerable<Order>> GetAllAsync()
+    {
+        return await _dbSet
+            .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                    .ThenInclude(p => p.Category)
+            .Include(o => o.Client)
+            .Include(o => o.ShippingAddress)
+            .Include(o => o.PromoCode)
+            .OrderByDescending(o => o.OrderDate)
+            .ToListAsync();
+    }
 }
+
+
 
 
