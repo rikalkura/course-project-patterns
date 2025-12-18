@@ -11,3 +11,4 @@ public class Category
     public virtual ICollection<Product> Products { get; set; } = new List<Product>();
 }
 
+

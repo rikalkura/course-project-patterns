@@ -19,3 +19,4 @@ public class Product
     public bool IsInStock => StockQuantity > 0;
 }
 
+

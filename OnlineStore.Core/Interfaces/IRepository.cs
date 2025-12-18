@@ -13,5 +13,6 @@ public interface IRepository<T> where T : class
     Task DeleteAsync(T entity);
     Task<bool> ExistsAsync(int id);
     Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null);
+    Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
 
