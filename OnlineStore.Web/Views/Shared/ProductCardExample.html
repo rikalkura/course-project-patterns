@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Card Example - Modern Soft UI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Modern Soft UI Design - Product Card Example */
+        
+        :root {
+            --bg-off-white: #F8F9FA;
+            --bg-pure-white: #FFFFFF;
+            --primary-soft-blue: #4A90E2;
+            --primary-teal: #20C997;
+            --text-dark-gray: #343A40;
+            --text-medium-gray: #6C757D;
+            --border-radius-base: 12px;
+            --border-radius-large: 16px;
+            --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Poppins', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-off-white);
+            padding: 2rem;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: var(--text-dark-gray);
+            margin-bottom: 2rem;
+            font-weight: 600;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .product-card {
+            background-color: var(--bg-pure-white);
+            border-radius: var(--border-radius-large);
+            box-shadow: var(--shadow-soft);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .product-card-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-radius: var(--border-radius-large) var(--border-radius-large) 0 0;
+        }
+
+        .product-card-image-placeholder {
+            width: 100%;
+            height: 250px;
+            background: linear-gradient(135deg, #F8F9FA 0%, #E9ECEF 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-medium-gray);
+            border-radius: var(--border-radius-large) var(--border-radius-large) 0 0;
+        }
+
+        .product-card-body {
+            padding: 1.5rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-card-title {
+            color: var(--text-dark-gray);
+            font-weight: 600;
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-card-description {
+            color: var(--text-medium-gray);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            flex-grow: 1;
+        }
+
+        .product-card-category {
+            color: var(--text-medium-gray);
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+        }
+
+        .product-card-footer {
+            margin-top: auto;
+            padding-top: 1rem;
+            border-top: 1px solid #F1F3F5;
+        }
+
+        .product-card-price {
+            color: var(--primary-soft-blue);
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+        }
+
+        .product-card-badge {
+            display: inline-block;
+            margin-bottom: 1rem;
+            border-radius: var(--border-radius-base);
+            padding: 0.5rem 0.75rem;
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+
+        .badge-success {
+            background-color: var(--primary-teal);
+            color: white;
+        }
+
+        .badge-danger {
+            background-color: #F56565;
+            color: white;
+        }
+
+        .product-card-button {
+            width: 100%;
+            border-radius: var(--border-radius-base);
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            background-color: var(--primary-soft-blue);
+            color: white;
+            border: none;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(74, 144, 226, 0.2);
+            cursor: pointer;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        .product-card-button:hover {
+            background-color: #357ABD;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(74, 144, 226, 0.3);
+        }
+
+        .product-card-button:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Product Card Examples - Modern Soft UI</h1>
+        
+        <div class="product-grid">
+            <!-- Product Card 1: With Image -->
+            <div class="product-card">
+                <img src="https://via.placeholder.com/400x250/4A90E2/FFFFFF?text=Product+Image" 
+                     alt="Sample Product" 
+                     class="product-card-image" />
+                <div class="product-card-body">
+                    <h3 class="product-card-title">Premium Wireless Headphones</h3>
+                    <p class="product-card-description">
+                        Experience crystal-clear sound with our premium wireless headphones. 
+                        Featuring noise cancellation and 30-hour battery life.
+                    </p>
+                    <p class="product-card-category">
+                        <small>Category: Electronics</small>
+                    </p>
+                    <div class="product-card-footer">
+                        <div class="product-card-price">$199.99</div>
+                        <span class="product-card-badge badge-success">In Stock (15)</span>
+                        <button class="product-card-button">Add to Cart</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Card 2: Without Image -->
+            <div class="product-card">
+                <div class="product-card-image-placeholder">
+                    <span>No Image</span>
+                </div>
+                <div class="product-card-body">
+                    <h3 class="product-card-title">Designer Coffee Mug</h3>
+                    <p class="product-card-description">
+                        A beautifully crafted ceramic mug perfect for your morning coffee. 
+                        Ergonomic handle and dishwasher safe.
+                    </p>
+                    <p class="product-card-category">
+                        <small>Category: Home & Kitchen</small>
+                    </p>
+                    <div class="product-card-footer">
+                        <div class="product-card-price">$24.99</div>
+                        <span class="product-card-badge badge-success">In Stock (42)</span>
+                        <button class="product-card-button">Add to Cart</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Card 3: Out of Stock -->
+            <div class="product-card">
+                <img src="https://via.placeholder.com/400x250/20C997/FFFFFF?text=Limited+Edition" 
+                     alt="Limited Edition Product" 
+                     class="product-card-image" />
+                <div class="product-card-body">
+                    <h3 class="product-card-title">Limited Edition Watch</h3>
+                    <p class="product-card-description">
+                        Exclusive timepiece with premium materials and precision engineering. 
+                        Only available in limited quantities.
+                    </p>
+                    <p class="product-card-category">
+                        <small>Category: Accessories</small>
+                    </p>
+                    <div class="product-card-footer">
+                        <div class="product-card-price">$599.99</div>
+                        <span class="product-card-badge badge-danger">Out of Stock</span>
+                        <button class="product-card-button" disabled style="opacity: 0.5; cursor: not-allowed;">Add to Cart</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

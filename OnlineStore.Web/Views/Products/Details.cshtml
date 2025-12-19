@@ -1,0 +1,75 @@
+@model OnlineStore.Application.Features.Products.DTOs.ProductDto
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            @if (!string.IsNullOrEmpty(Model.PhotoPath))
+            {
+                @if (Model.PhotoPath.StartsWith("http://") || Model.PhotoPath.StartsWith("https://"))
+                {
+                    <img src="@Model.PhotoPath" class="img-fluid product-card-image" alt="@Model.Name" style="border-radius: var(--border-radius-large);" />
+                }
+                else
+                {
+                    <img src="~/@Model.PhotoPath" class="img-fluid product-card-image" alt="@Model.Name" style="border-radius: var(--border-radius-large);" />
+                }
+            }
+            else
+            {
+                <div class="product-card-image-placeholder" style="height: 400px;">
+                    <span>No Image Available</span>
+                </div>
+            }
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h1 class="mb-3">@Model.Name</h1>
+                <p class="text-muted mb-4">Category: @Model.CategoryName</p>
+                
+                <div class="mb-4">
+                    <h3 class="text-primary mb-3">$@Model.Price.ToString("F2")</h3>
+                    @if (Model.IsInStock)
+                    {
+                        <span class="badge bg-success">In Stock (@Model.StockQuantity available)</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">Out of Stock</span>
+                    }
+                </div>
+                
+                <div class="mb-4">
+                    <h4 class="mb-3">Description</h4>
+                    <p class="card-text">@(string.IsNullOrEmpty(Model.Description) ? "No description available." : Model.Description)</p>
+                </div>
+                
+                @if (Model.IsInStock)
+                {
+                    <form asp-controller="Cart" asp-action="Add" method="post" class="mb-3">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="productId" value="@Model.Id" />
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="quantity" class="form-label">Quantity:</label>
+                                <input type="number" name="quantity" value="1" min="1" max="@Model.StockQuantity" class="form-control" id="quantity" required />
+                            </div>
+                            <div class="col-md-8 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary btn-lg w-100">Add to Cart</button>
+                            </div>
+                        </div>
+                    </form>
+                }
+                
+                <div class="mt-4">
+                    <a asp-action="Index" class="btn btn-secondary">Back to Products</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

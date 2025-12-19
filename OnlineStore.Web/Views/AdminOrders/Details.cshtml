@@ -1,0 +1,179 @@
+@model OnlineStore.Application.Features.Orders.DTOs.OrderDto
+@using OnlineStore.Core.Enums
+@{
+    ViewData["Title"] = "Admin - Order Details";
+}
+
+<h1 class="mb-4">Order Details</h1>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="row">
+    <div class="col-lg-8 mb-4">
+        <div class="card border-0 shadow-sm" style="border-radius: var(--border-radius-large);">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="card-title mb-0" style="color: var(--text-dark-gray);">Order #@Model.Id</h3>
+                    <span class="badge @(Model.Status == OrderStatus.Created ? "bg-warning" : 
+                                         Model.Status == OrderStatus.Paid ? "bg-info" : 
+                                         Model.Status == OrderStatus.Shipped ? "bg-primary" : 
+                                         Model.Status == OrderStatus.Delivered ? "bg-success" : 
+                                         Model.Status == OrderStatus.Completed ? "bg-success" : "bg-danger")" 
+                          style="font-size: 0.9rem; padding: 0.5rem 1rem;">
+                        @Model.Status
+                    </span>
+                </div>
+
+                <div class="mb-4">
+                    <p class="text-muted mb-1"><strong>Order Date:</strong> @Model.OrderDate.ToString("MMMM dd, yyyy 'at' HH:mm")</p>
+                    <p class="text-muted mb-1"><strong>Client:</strong> @Model.ClientName</p>
+                    <p class="text-muted mb-1"><strong>Client ID:</strong> @Model.ClientId</p>
+                </div>
+
+                <hr />
+
+                <h5 class="mb-3" style="color: var(--text-dark-gray);">Order Items</h5>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Unit Price</th>
+                                <th class="text-end">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.OrderItems != null && Model.OrderItems.Any())
+                            {
+                                @foreach (var item in Model.OrderItems)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="fw-semibold">@item.ProductName</div>
+                                        </td>
+                                        <td>@item.Quantity</td>
+                                        <td>$@item.UnitPrice.ToString("F2")</td>
+                                        <td class="text-end fw-bold">$@item.Subtotal.ToString("F2")</td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted">No items in this order</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <hr />
+
+                <h5 class="mb-3" style="color: var(--text-dark-gray);">Shipping Information</h5>
+                <div class="mb-3">
+                    <p class="mb-1"><strong>Address:</strong></p>
+                    <p class="text-muted mb-0">
+                        @Model.ShippingAddress.Street<br />
+                        @Model.ShippingAddress.City, @Model.ShippingAddress.State @Model.ShippingAddress.ZipCode<br />
+                        @Model.ShippingAddress.Country
+                    </p>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Delivery Method:</strong></p>
+                        <p class="text-muted mb-0">@Model.DeliveryMethod</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Payment Method:</strong></p>
+                        <p class="text-muted mb-0">@Model.PaymentMethod</p>
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.PromoCode))
+                {
+                    <div class="mb-3">
+                        <p class="mb-1"><strong>Promo Code:</strong></p>
+                        <p class="text-muted mb-0">@Model.PromoCode</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm sticky-top" style="top: 20px; border-radius: var(--border-radius-large);">
+            <div class="card-body">
+                <h4 class="card-title mb-4" style="color: var(--text-dark-gray);">Order Summary</h4>
+                
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Subtotal:</span>
+                        <span class="fw-semibold">$@((Model.OrderItems?.Sum(i => i.Subtotal) ?? 0).ToString("F2"))</span>
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.PromoCode) && Model.DiscountAmount > 0)
+                    {
+                        <div class="d-flex justify-content-between mb-2 text-success">
+                            <span>Promo Code Discount (@Model.PromoCode):</span>
+                            <span>-$@Model.DiscountAmount.ToString("F2")</span>
+                        </div>
+                    }
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Delivery:</span>
+                        <span class="fw-semibold">$@Model.DeliveryCost.ToString("F2")</span>
+                    </div>
+                </div>
+                
+                <div class="border-top pt-3 mt-3">
+                    <div class="d-flex justify-content-between">
+                        <span class="fw-bold" style="font-size: 1.1rem; color: var(--text-dark-gray);">Total:</span>
+                        <span class="fw-bold" style="font-size: 1.3rem; color: var(--primary-soft-blue);">$@Model.TotalAmount.ToString("F2")</span>
+                    </div>
+                </div>
+
+                <hr class="my-4" />
+
+                <h5 class="mb-3" style="color: var(--text-dark-gray);">Update Order Status</h5>
+                <form asp-action="UpdateStatus" asp-route-id="@Model.Id" method="post" class="mb-3">
+                    @Html.AntiForgeryToken()
+                    <div class="mb-3">
+                        <label for="status" class="form-label">New Status</label>
+                        <select name="status" id="status" class="form-select" required>
+                            <option value="@OrderStatus.Created" selected="@(Model.Status == OrderStatus.Created)">Created</option>
+                            <option value="@OrderStatus.Paid" selected="@(Model.Status == OrderStatus.Paid)">Paid</option>
+                            <option value="@OrderStatus.Shipped" selected="@(Model.Status == OrderStatus.Shipped)">Shipped</option>
+                            <option value="@OrderStatus.Delivered" selected="@(Model.Status == OrderStatus.Delivered)">Delivered</option>
+                            <option value="@OrderStatus.Completed" selected="@(Model.Status == OrderStatus.Completed)">Completed</option>
+                            <option value="@OrderStatus.Cancelled" selected="@(Model.Status == OrderStatus.Cancelled)">Cancelled</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100" style="border-radius: var(--border-radius-large); font-weight: 600;">
+                        <i class="bi bi-check-circle me-2"></i>Update Status
+                    </button>
+                </form>
+
+                <div class="mt-3">
+                    <a asp-action="Index" class="btn btn-outline-secondary w-100" style="border-radius: var(--border-radius-large);">
+                        <i class="bi bi-arrow-left me-2"></i>Back to Orders
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

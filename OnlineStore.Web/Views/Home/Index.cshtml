@@ -1,0 +1,203 @@
+﻿@model IEnumerable<OnlineStore.Application.Features.Products.DTOs.ProductDto>
+@{
+    ViewData["Title"] = "Home";
+}
+
+<!-- Hero Section -->
+<section class="hero-section py-5 mb-5" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: var(--border-radius-large);">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <h1 class="display-4 fw-bold mb-4" style="color: var(--text-dark-gray);">Upgrade Your Gear</h1>
+                <p class="lead mb-4" style="color: var(--text-medium-gray); font-size: 1.25rem;">Premium electronics and accessories for professionals</p>
+                <a asp-controller="Products" asp-action="Index" class="btn btn-primary btn-lg px-5 py-3" style="border-radius: var(--border-radius-large); font-weight: 600;">
+                    Shop Now
+                </a>
+            </div>
+            <div class="col-lg-6 text-center">
+                <img src="https://res.cloudinary.com/dnjledoti/image/upload/v1766072580/mouse_thlg5q.png" 
+                     alt="Premium Electronics" 
+                     class="img-fluid" 
+                     style="max-height: 500px; border-radius: var(--border-radius-large); box-shadow: var(--shadow-hover);" />
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Products Section -->
+<section class="featured-products-section mb-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold mb-3" style="color: var(--text-dark-gray);">Trending Now</h2>
+            <p class="text-muted" style="font-size: 1.1rem;">Discover our most popular products</p>
+        </div>
+        
+        @if (Model != null && Model.Any())
+        {
+            <div class="row g-4">
+                @foreach (var product in Model)
+                {
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm" style="border-radius: var(--border-radius-large);">
+                            <div class="position-relative" style="overflow: hidden; border-radius: var(--border-radius-large) var(--border-radius-large) 0 0;">
+                                @if (!string.IsNullOrEmpty(product.PhotoPath))
+                                {
+                                    @if (product.PhotoPath.StartsWith("http://") || product.PhotoPath.StartsWith("https://"))
+                                    {
+                                        <img src="@product.PhotoPath" class="card-img-top" alt="@product.Name" style="height: 300px; object-fit: cover; transition: transform 0.3s ease;" />
+                                    }
+                                    else
+                                    {
+                                        <img src="~/@product.PhotoPath" class="card-img-top" alt="@product.Name" style="height: 300px; object-fit: cover; transition: transform 0.3s ease;" />
+                                    }
+                                }
+                                else
+                                {
+                                    <div class="d-flex align-items-center justify-content-center bg-light" style="height: 300px;">
+                                        <span class="text-muted">No Image</span>
+                                    </div>
+                                }
+                            </div>
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title fw-bold mb-2" style="color: var(--text-dark-gray);">@product.Name</h5>
+                                <p class="card-text text-muted mb-3 flex-grow-1" style="font-size: 0.95rem;">
+                                    @(product.Description?.Length > 100 ? product.Description.Substring(0, 100) + "..." : product.Description ?? "Premium quality product")
+                                </p>
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span class="h4 mb-0 fw-bold" style="color: var(--primary-soft-blue);">$@product.Price.ToString("F2")</span>
+                                    @if (product.IsInStock)
+                                    {
+                                        <span class="badge bg-success">In Stock</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Out of Stock</span>
+                                    }
+                                </div>
+                                @if (product.IsInStock)
+                                {
+                                    <form asp-controller="Cart" asp-action="Add" method="post" class="mt-auto">
+                                        <input type="hidden" name="productId" value="@product.Id" />
+                                        <input type="hidden" name="quantity" value="1" />
+                                        <button type="submit" class="btn btn-primary w-100" style="border-radius: var(--border-radius-base); font-weight: 600;">
+                                            <i class="bi bi-cart-plus me-2"></i>Add to Cart
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-secondary w-100" disabled style="border-radius: var(--border-radius-base);">
+                                        Out of Stock
+                                    </button>
+                                }
+                                <a asp-controller="Products" asp-action="Details" asp-route-id="@product.Id" class="btn btn-link text-center mt-2 p-0" style="text-decoration: none;">
+                                    View Details <i class="bi bi-arrow-right ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+            
+            <div class="text-center mt-5">
+                <a asp-controller="Products" asp-action="Index" class="btn btn-outline-primary btn-lg px-5" style="border-radius: var(--border-radius-large); font-weight: 600;">
+                    View All Products
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <div class="alert alert-info border-0 shadow-sm" style="border-radius: var(--border-radius-large);">
+                    <h5 class="mb-3">No products available at the moment</h5>
+                    <p class="mb-0">Check back soon for our latest offerings!</p>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+
+<!-- Benefits Section -->
+<section class="benefits-section py-5 mb-5" style="background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%); border-radius: var(--border-radius-large);">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="text-center p-4">
+                    <div class="mb-4" style="width: 80px; height: 80px; margin: 0 auto; background: linear-gradient(135deg, var(--primary-soft-blue), #357ABD); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-soft);">
+                        <i class="bi bi-truck text-white" style="font-size: 2rem;"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3" style="color: var(--text-dark-gray);">Fast Delivery</h4>
+                    <p class="text-muted mb-0">Get your orders delivered quickly and safely to your doorstep</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center p-4">
+                    <div class="mb-4" style="width: 80px; height: 80px; margin: 0 auto; background: linear-gradient(135deg, var(--primary-teal), #1BA085); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-soft);">
+                        <i class="bi bi-shield-check text-white" style="font-size: 2rem;"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3" style="color: var(--text-dark-gray);">Quality Guarantee</h4>
+                    <p class="text-muted mb-0">We stand behind every product with our quality assurance promise</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center p-4">
+                    <div class="mb-4" style="width: 80px; height: 80px; margin: 0 auto; background: linear-gradient(135deg, #FF6B6B, #EE5A6F); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-soft);">
+                        <i class="bi bi-headset text-white" style="font-size: 2rem;"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3" style="color: var(--text-dark-gray);">24/7 Support</h4>
+                    <p class="text-muted mb-0">Our customer support team is always here to help you</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    /* Hero Section Hover Effects */
+    .hero-section img {
+        transition: transform 0.3s ease;
+    }
+    
+    .hero-section:hover img {
+        transform: scale(1.05);
+    }
+    
+    /* Product Card Image Hover */
+    .card:hover .card-img-top {
+        transform: scale(1.1);
+    }
+    
+    /* Button Hover Effects */
+    .btn-outline-primary {
+        border: 2px solid var(--primary-soft-blue);
+        color: var(--primary-soft-blue);
+        background-color: transparent;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-outline-primary:hover {
+        background-color: var(--primary-soft-blue);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-hover);
+    }
+    
+    /* Responsive adjustments */
+    @@media (max-width: 768px) {
+        .hero-section {
+            text-align: center;
+        }
+        
+        .hero-section h1 {
+            font-size: 2.5rem;
+        }
+        
+        .hero-section .lead {
+            font-size: 1.1rem;
+        }
+        
+        .card-img-top {
+            height: 250px !important;
+        }
+    }
+</style>
