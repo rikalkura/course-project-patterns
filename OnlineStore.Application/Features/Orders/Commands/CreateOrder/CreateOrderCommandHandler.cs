@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Http;
 using OnlineStore.Application.Features.Cart.Queries.GetCart;
 using OnlineStore.Application.Patterns.Builder;
 using OnlineStore.Application.Patterns.Factory;
-using OnlineStore.Application.Patterns.Strategy;
 using OnlineStore.Core.Entities;
 using OnlineStore.Core.Enums;
 using OnlineStore.Core.Interfaces;
@@ -20,7 +19,6 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, int
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IMediator _mediator;
     private readonly IProductTypeFactory _productTypeFactory;
-    private readonly IDeliveryCostStrategy _deliveryStrategy;
 
     public CreateOrderCommandHandler(
         IOrderRepository orderRepository,
@@ -29,8 +27,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, int
         IPromoCodeRepository promoCodeRepository,
         IHttpContextAccessor httpContextAccessor,
         IMediator mediator,
-        IProductTypeFactory productTypeFactory,
-        IDeliveryCostStrategy deliveryStrategy)
+        IProductTypeFactory productTypeFactory)
     {
         _orderRepository = orderRepository;
         _productRepository = productRepository;
@@ -39,7 +36,6 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, int
         _httpContextAccessor = httpContextAccessor;
         _mediator = mediator;
         _productTypeFactory = productTypeFactory;
-        _deliveryStrategy = deliveryStrategy;
     }
 
     public async Task<int> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
@@ -108,11 +104,12 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, int
         }
 
         // Build order using Builder pattern with Strategy pattern for delivery
+        // Pass null to let OrderBuilder create the correct strategy based on delivery method
         var orderBuilder = new OrderBuilder();
         var order = orderBuilder
             .WithClient(request.ClientId)
             .WithItems(orderItems)
-            .WithDeliveryMethod(request.OrderData.DeliveryMethod, _deliveryStrategy)
+            .WithDeliveryMethod(request.OrderData.DeliveryMethod, null)
             .WithPaymentMethod(request.OrderData.PaymentMethod)
             .WithAddress(address)
             .WithPromoCode(promoCode)
